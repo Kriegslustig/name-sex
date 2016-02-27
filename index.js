@@ -39,8 +39,6 @@ const computeName = name => {
   return [arr[0]].concat(arr)
 }
 
-console.log(computeName('test'))
-
 trainer.train(set.map(el => {
   return {
     input: computeName(el[0]),
