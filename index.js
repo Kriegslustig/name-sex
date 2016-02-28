@@ -4,11 +4,6 @@ const synaptic = require('synaptic')
 const set = require('./set.json')
 const fs = require('fs')
 
-const network = new synaptic.Architect.Perceptron(6, 12, 6, 1);
-const trainer = new synaptic.Trainer(network, {
-  iterations: 10000
-})
-
 const computeName = name => {
   let arr = name
     .substr(0,6)
@@ -39,18 +34,37 @@ const computeName = name => {
   return [arr[0]].concat(arr)
 }
 
-trainer.train(set.map(el => {
-  return {
-    input: computeName(el[0]),
-    output: [el[1]]
+module.exports = () => {
+  let network
+  const train = (net) => {
+    const trainer = new synaptic.Trainer(net, {
+      iterations: 10000
+    })
+    trainer.train(set.map(el => {
+      return {
+        input: computeName(el[0]),
+        output: [el[1]]
+      }
+    }))
+    fs.writeFileSync('memory.json', JSON.stringify(net.toJSON()))
+    return net
   }
-}))
 
-module.exports = {
-  test (x) {
-    return network.activate(computeName(x))
-  },
-  network,
-  computeName
+  try {
+    network = synaptic.Network.fromJSON(require('./memory.json'))
+  } catch (e) {
+    console.log('No memory found! Recomputing...')
+    network = new synaptic.Architect.Perceptron(6, 12, 6, 1);
+    net(network)
+  }
+
+  const test = str => network.activate(computeName(str))
+
+  return {
+    network,
+    test,
+    train,
+    computeName
+  }
 }
 
