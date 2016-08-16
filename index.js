@@ -4,9 +4,8 @@ const synaptic = require('synaptic')
 const set = require('./set.json')
 const fs = require('fs')
 
-const computeName = name => {
-  let arr = name
-    .substr(0,6)
+const computeName = name =>
+  name
     .split('')
     .reverse()
     .map(c => {
@@ -14,16 +13,13 @@ const computeName = name => {
           (
             c
               .toLowerCase()
-              .charCodeAt(0)
-            - 94
+              .charCodeAt(0) - 94
           )
-        )
-          / 25
+        ) / 25
       return x > 1
         ? 1
         : x
-    }
-    )
+    })
     .reduce(
       (mem, el, i) => {
         mem[i] = el
@@ -31,14 +27,13 @@ const computeName = name => {
       },
       Array.from(Array(6)).fill(0)
     )
-  return [arr[0]].concat(arr)
-}
 
 module.exports = () => {
   let network
-  const train = (net) => {
+  const train = net => {
+    console.log('Starting to train.')
     const trainer = new synaptic.Trainer(net, {
-      iterations: 10000
+      iterations: 100
     })
     trainer.train(set.map(el => {
       return {
@@ -54,8 +49,7 @@ module.exports = () => {
     network = synaptic.Network.fromJSON(require('./memory.json'))
   } catch (e) {
     console.log('No memory found! Recomputing...')
-    network = new synaptic.Architect.Perceptron(6, 12, 6, 1);
-    net(network)
+    network = new synaptic.Architect.Perceptron(5, 10, 5, 1)
   }
 
   const test = str => network.activate(computeName(str))
